@@ -1,0 +1,63 @@
+const express = require('express');
+const app = express();
+const bodyParser = require('body-parser');
+const restaurantsData = require('./restaurants.json'); // Assuming you have a JSON file with restaurant data
+
+// Middleware
+app.use(bodyParser.json());
+
+// GET endpoint to fetch all restaurants
+app.get('/restaurants', (req, res) => {
+  res.json(restaurantsData);
+});
+
+// GET endpoint to fetch a specific restaurant by ID
+app.get('/restaurants/:id', (req, res) => {
+  const restaurantId = req.params.id;
+  const restaurant = restaurantsData.find(r => r.id === restaurantId);
+
+  if (!restaurant) {
+    res.status(404).json({ error: 'Restaurant not found' });
+  } else {
+    res.json(restaurant);
+  }
+});
+
+// POST endpoint to create a new restaurant
+app.post('/restaurants', (req, res) => {
+  const newRestaurant = req.body;
+  restaurantsData.push(newRestaurant);
+  res.status(201).json(newRestaurant);
+});
+
+// PUT endpoint to update a restaurant by ID
+app.put('/restaurants/:id', (req, res) => {
+  const restaurantId = req.params.id;
+  const updatedRestaurant = req.body;
+  const index = restaurantsData.findIndex(r => r.id === restaurantId);
+
+  if (index === -1) {
+    res.status(404).json({ error: 'Restaurant not found' });
+  } else {
+    restaurantsData[index] = updatedRestaurant;
+    res.json(updatedRestaurant);
+  }
+});
+
+// DELETE endpoint to delete a restaurant by ID
+app.delete('/restaurants/:id', (req, res) => {
+  const restaurantId = req.params.id;
+  const index = restaurantsData.findIndex(r => r.id === restaurantId);
+
+  if (index === -1) {
+    res.status(404).json({ error: 'Restaurant not found' });
+  } else {
+    const deletedRestaurant = restaurantsData.splice(index, 1);
+    res.json(deletedRestaurant[0]);
+  }
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
